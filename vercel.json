@@ -5,7 +5,7 @@
       "use": "@vercel/static-build",
       "config": {
         "distDir": "frontend/build",
-        "rootDirectory": "frontend"
+        "rootDirectory": "frontend" 
       }
     }
   ]
