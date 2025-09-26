@@ -6,7 +6,7 @@
       "config": {
         "distDir": "frontend/build",
         "rootDirectory": "frontend" 
-      }
+      }  
     }
   ]
 }
