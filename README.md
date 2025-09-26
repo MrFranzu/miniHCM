@@ -1,70 +1,69 @@
-# Getting Started with Create React App
+# 🕒 Mini HCM Time Tracking System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **User Registration & Authentication**
+  - Firebase Authentication (Email/Password)
+  - User details stored in Firestore (name, email, role, timezone, schedule)
 
-### `npm start`
+- **Shift Scheduling**
+  - Define shift start and end times per user
+  - Used for computing lateness, undertime, and overtime
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Time-In / Time-Out Logging**
+  - React.js interface with Punch In / Punch Out buttons
+  - Attendance records stored in Firestore with timestamps
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Automatic Computations**
+  - Regular hours (within scheduled shift)
+  - Overtime (OT) beyond shift
+  - Night Differential (ND) for work between 22:00–06:00
+  - Late arrivals
+  - Undertime (early leave)
 
-### `npm test`
+- **Daily Summary**
+  - Aggregated totals stored in Firestore
+  - Dashboard + History table in React
+  - Breakdown of Regular, OT, ND, Late, and Undertime
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Admin Tools**
+  - View and edit punches
+  - Access daily and weekly reports with all metrics
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🛠 Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Frontend:** React.js  
+- **Backend:** Node.js + Express  
+- **Database & Auth:** Firebase (Firestore + Firebase Auth, free tier)  
+- **Hosting:** Vercel 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 📊 Expected Output
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- ✅ Registration and login flow  
+- ✅ Time-in / Time-out recording  
+- ✅ Automatic computation of hours (Regular, OT, ND, Late, Undertime)  
+- ✅ Daily summary dashboard with KPIs  
+- ✅ Admin reporting tools  
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📷 Screenshots 
+<img width="1156" height="781" alt="image" src="https://github.com/user-attachments/assets/58f7a0e3-a33d-4349-af58-f6b7ab98db67" />
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+<img width="1178" height="601" alt="image" src="https://github.com/user-attachments/assets/72fce387-6e09-4be3-91bf-bcd3c14d90d3" />
 
-## Learn More
+<img width="1847" height="648" alt="image" src="https://github.com/user-attachments/assets/3bcafc5d-3fa2-4c5a-8450-6773343b1f12" />
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
