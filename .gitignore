@@ -1,18 +1,5 @@
 backend/serviceAccountKey.json
 
-{
-  "type": "service_account",
-  "project_id": "mini-hcm",
-  "private_key_id": "0fc0b441b395d9977520f7fdba3036746e2553d4",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC30TFlYMFFUhU0\noXwXYAJ+bCDjA10WEEyevmBXT8JbDJ/KDCF6ff7yWaZbdEZj9zQY/sLRy10wg9ZN\ncGnuPmF9T487N2eRzebE6a7fYmbK5BoBgCJEbZebHGlXckVWINBAoFF9KR/OVkA/\njESanG9+cCyl/ERnlXScjPdm8/KFKoJtD+LqAjora5QaCduRoJnjBf3QDIYM9fzR\nlInacoLzdtb6rYU+LOTzI8qFpq6Y+uLO5hlEG/vM620IX8/51w8u6TOnH1UZJa1U\nXEjlzmP7+U3ypq0mhF1yJiiVHnuDsJSdXl8VgCsA+zD+OH9iA1jPOSX29Aqmotyg\nB5FqkbYBAgMBAAECggEABD/tYkMiOhiOOJ5yeyszPjoAvqQxbupR4ypSmYzUrlHf\nOzFxmrPhWjgGt77l8Qy3jcu3XwNSdGXakAVv0DFtWT4mzmnXAVDJ1jadiOOXrcwn\n6m33HNmNyOkXabf7cLonJmoDyEl+8esePCSMN34zY7BzOnktGa9OYrTYSW84EFUO\nZVdRkm/1+AdMNwYE8vGZx8A+ELcgvMPrsooGoAVtdD+XI/gOQmMsVLDWsZJ/LnvA\n3qALLUQb1+LH+hHEizDBtc/ZdDzydcfLl/0IXneUpOhc6l+KaNS+wl5MsTFZ7mdf\nxjL4CwvgP88cybCYhRdll7QO9rnxp1rDKWF5gUbV4QKBgQDgNECK7hUszQA5hEP7\nZaSBudylNE4s4IBYd2hY8oVCzVC2E8/USmCgrqHXcUG1spXZdinSLHV2lQILJzf7\nMa8Jz6NZeg2LCi5/XCpzYpngovMn8mAYL/p2TZ0JL7bqG2LS811P+hNk7scxn4OO\n3Y1Zt1owH/lZBCgfOPEZLHpgqQKBgQDR4rB+zR510KV9niczRwJ6GOGgT2XoGi9y\nNOEsiINC9qLPdDHScaB/bQ6geV8EDfhWL9WDnJKJYw85WtIQ01AqVZNqXf/nDXx7\nFEbWTQ//0NBzFzSDDAbN3UDh+yaN7ckYGh+LEEmNYeshyU+dE6OViKAF9JAEWH1p\njAnYZMgJmQKBgHSWt3mHlTtW32cJgNCaapGLNVIzgPOVSyi1721RsDqsyevlIY4j\nn1vvc/m0y5bQ51vONrE0rWCc3BMwscvOalePwkIlViWXhdZ09x5Jh/towUlkoNPz\nHyul8KN2TIgw9ZL9Ouj8AlnaUXtcl+0TCQ4+aofcGK5RmwuhcL7Ggl0BAoGAUCWi\nhClL0m2EZH26NmiNV5acwhzPq1wkdhYfTmQqy61m6pVSWSwuv7ojdcAjOmcjR7Yo\ncIOfqXr8W0iFIwuudxwKmPmgONj7ifxqOHdg/qz8jJZ15Pz4tDAjEKhZRqVgvyVq\nmi30CFs18Mbw8eiH9RghE2Uaga5Q5bcmI04I3TECgYEAnQJ5zu6ygrnT9BWnqiIP\nZ5O4xpfBrCoOLe9dZ3ghpcj5ccKqFR3DFukyFB3dZ0eRx1T5Vf6YJa3emeitsBxE\n0r1jNkDOIXY4hADd7/rsjf+S63Xcndc+fGFRNlZC1ANC/wbxqfmEVc7+YtoYG4av\nQY6fNZ48syX9Lb0j2q/kmnw=\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-fbsvc@mini-hcm.iam.gserviceaccount.com",
-  "client_id": "103662499523809655582",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40mini-hcm.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
