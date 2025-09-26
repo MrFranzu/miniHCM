@@ -6,7 +6,7 @@
       "use": "@vercel/static-build"
     }
   ],
-  "outputDirectory": "frontend/build",
+  "outputDirectory": "build",
   "rewrites": [
     {
       "source": "/(.*)",
