@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE = "http://localhost:5000";
+const BASE = "https://mini-hcm.vercel.app/api";
 
 // Helper for auth header
 function authHeaders(token) {
