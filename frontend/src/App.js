@@ -18,11 +18,12 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (u) => {
-      if (u) {
+          if (u) {
         setUser(u);
         try {
-          const token = await u.getIdToken();
+          const token = await u.getIdToken(true);  // <--- force refresh
           setIdToken(token);
+
           const snap = await getDoc(doc(db, "users", u.uid));
           if (snap.exists()) {
             setRole(snap.data().role || "employee");
@@ -34,7 +35,8 @@ export default function App() {
           setIdToken(null);
           setRole(null);
         }
-      } else {
+      }
+      else {
         setUser(null);
         setIdToken(null);
         setRole(null);

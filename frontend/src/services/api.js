@@ -1,11 +1,8 @@
-// frontend/src/services/api.js
 import axios from "axios";
 
-// Change this if deploying to production
 const BASE = "http://localhost:5000";
 
-
-// Helper to add Firebase ID token to request headers
+// Helper for auth header
 function authHeaders(token) {
   return {
     headers: {
@@ -14,74 +11,26 @@ function authHeaders(token) {
   };
 }
 
-/**
- * POST /punch
- * @param {string} idToken - Firebase ID token
- * @param {string} type - "in" or "out"
- */
-export async function punch(idToken, type) {
-  return axios.post(`${BASE}/punch`, { type }, authHeaders(idToken));
+export async function punch(token, type) {
+  return axios.post(`${BASE}/punch`, { type }, authHeaders(token));
 }
 
-/**
- * POST /computeSummary
- * @param {string} idToken - Firebase ID token
- * @param {string} date - Date string (e.g., "2025-09-25")
- * @param {string} userId - Optional (admin only)
- */
-export async function computeSummary(idToken, date, userId) {
-  return axios.post(`${BASE}/computeSummary`, { date, userId }, authHeaders(idToken));
+export async function computeSummary(token, date, userId) {
+  return axios.post(`${BASE}/computeSummary`, { date, userId }, authHeaders(token));
 }
 
-/**
- * GET /admin/punches
- * @param {string} idToken - Firebase ID token
- * @param {Object} params - { userId, start, end }
- */
-export async function getAdminPunches(idToken, params) {
-  return axios.get(`${BASE}/admin/punches`, {
-    params,
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+export async function getAdminPunches(token, params) {
+  return axios.get(`${BASE}/admin/punches`, { ...authHeaders(token), params });
 }
 
-/**
- * POST /admin/editPunch
- * @param {string} idToken - Firebase ID token
- * @param {Object} body - { punchId, type?, timestampISO? }
- */
-export async function editPunch(idToken, body) {
-  return axios.post(`${BASE}/admin/editPunch`, body, {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+export async function editPunch(token, body) {
+  return axios.post(`${BASE}/admin/editPunch`, body, authHeaders(token));
 }
 
-/**
- * POST /admin/weeklyReport
- * @param {string} idToken - Firebase ID token
- * @param {Object} body - { weekStart, userId? }
- */
-export async function weeklyReport(idToken, body) {
-  return axios.post(`${BASE}/admin/weeklyReport`, body, {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+export async function weeklyReport(token, body) {
+  return axios.post(`${BASE}/admin/weeklyReport`, body, authHeaders(token));
 }
 
-/**
- * POST /admin/dailyReport
- * @param {string} idToken - Firebase ID token
- * @param {Object} param1 - { date }
- */
-export async function dailyReport(idToken, { date }) {
-  return axios.post(`${BASE}/admin/dailyReport`, { date }, {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+export async function dailyReport(token, { date }) {
+  return axios.post(`${BASE}/admin/dailyReport`, { date }, authHeaders(token));
 }

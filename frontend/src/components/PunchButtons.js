@@ -24,14 +24,19 @@ export default function PunchButtons({ idToken, user }) {
   }, [user]);
 
   const doPunch = async (type) => {
-    try {
-      await punch(idToken, type);
-      alert(`Punched ${type}`);
-    } catch (err) {
-      console.error(err);
-      alert("Error punching: " + (err.response?.data?.error || err.message));
-    }
-  };
+  try {
+    const res = await punch(idToken, type);   // ✅ capture response
+    alert(`Punched ${type}`);
+    console.log("Punch response:", res.data); // optional for debugging
+  } catch (err) {
+    console.error("Punch error:", err);
+    alert("Error punching: " + (err.response?.data?.error || err.message));
+  }
+};
+
+
+
+  
 
   // Inline styles for professional white/light blue theme
   const containerStyle = {

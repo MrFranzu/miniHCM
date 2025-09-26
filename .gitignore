@@ -1,25 +1,26 @@
 backend/serviceAccountKey.json
+frontend/.env
 
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-frontend/my-app/node_modules
-frontend/my-app/.pnp
-frontend/my-app/.pnp.js
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
 
 # testing
-frontend/my-app/coverage
+frontend/coverage
 
 # production
-frontend/my-app/build
+frontend/build
 
 # misc
-frontend/my-app/.DS_Store
-frontend/my-app/.env.local
-frontend/my-app/.env.development.local
-frontend/my-app/.env.test.local
-frontend/my-app/.env.production.local
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
 npm-debug.log*
 yarn-debug.log*
