@@ -8,5 +8,6 @@
         "distDir": "frontend/build" 
       }
     }
-  ]
+  ],
+   "outputDirectory": "frontend/build"
 }
