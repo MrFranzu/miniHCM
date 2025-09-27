@@ -2,10 +2,6 @@ import { admin, db } from "../backend/firebaseAdmin.js";
 import { DateTime } from "luxon";
 import { setCors } from "./_cors.js";
 
-export const config = {
-  runtime: "nodejs18.x"
-};
-
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
@@ -28,6 +24,7 @@ export default function handler(req, res) {
   }
   return res.status(405).json({ error: "Method not allowed" });
 }
+
 
 
 
