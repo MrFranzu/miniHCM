@@ -15,7 +15,7 @@ async function getUserDoc(uid) {
   return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
-export default function handler(req, res) {
+module.exports = (req, res) => {
   if (req.method === "GET") {
     return res.status(200).json({ ok: true, method: "GET" });
   }
@@ -23,7 +23,7 @@ export default function handler(req, res) {
     return res.status(200).json({ ok: true, method: "POST" });
   }
   return res.status(405).json({ error: "Method not allowed" });
-}
+};
 
 
 
