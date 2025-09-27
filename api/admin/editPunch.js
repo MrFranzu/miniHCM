@@ -1,5 +1,5 @@
-import { admin, db } from "../firebaseAdmin.js";
-import { setCors } from "./_cors.js";
+import { admin, db } from "../../backend/firebaseAdmin.js"; 
+import { setCors } from "../_cors.js";    
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
@@ -22,10 +22,7 @@ async function requireAdmin(decoded) {
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === "OPTIONS") return res.status(200).end();
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
     const decoded = await verifyToken(req);
@@ -36,9 +33,7 @@ export default async function handler(req, res) {
 
     const [docId, idxStr] = punchId.split("_");
     const punchIndex = parseInt(idxStr, 10);
-    if (!docId || isNaN(punchIndex)) {
-      return res.status(400).json({ error: "Invalid punchId format" });
-    }
+    if (!docId || isNaN(punchIndex)) return res.status(400).json({ error: "Invalid punchId format" });
 
     const ref = db.collection("attendance").doc(docId);
     const snap = await ref.get();
@@ -46,9 +41,7 @@ export default async function handler(req, res) {
 
     const data = snap.data();
     const punches = data.punches || [];
-    if (!punches[punchIndex]) {
-      return res.status(404).json({ error: "Punch index not found" });
-    }
+    if (!punches[punchIndex]) return res.status(404).json({ error: "Punch index not found" });
 
     punches[punchIndex] = {
       ...punches[punchIndex],

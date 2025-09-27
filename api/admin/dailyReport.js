@@ -1,5 +1,5 @@
-import { admin, db } from "../firebaseAdmin.js";
-import { setCors } from "./_cors.js";
+import { admin, db } from "../../backend/firebaseAdmin.js"; 
+import { setCors } from "../_cors.js";                       
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
@@ -22,10 +22,7 @@ async function requireAdmin(decoded) {
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === "OPTIONS") return res.status(200).end();
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
     const decoded = await verifyToken(req);
