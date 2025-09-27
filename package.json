@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "start": "node -e \"console.log('Run with vercel dev or vercel --prod')\""
+    "start": "node -e \"console.log('This project is intended to be run on Vercel or via vercel dev')\""
   },
   "dependencies": {
     "axios": "^1.4.0",
