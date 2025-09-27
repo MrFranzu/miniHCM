@@ -1,6 +1,6 @@
+import { admin, db } from "../../backend/firebaseAdmin.js";
 import { DateTime } from "luxon";
-import { admin, db } from "../../backend/firebaseAdmin.js"; 
-import { setCors } from "../_cors.js";    
+import { setCors } from "../_cors.js";
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
@@ -9,13 +9,9 @@ async function verifyToken(req) {
   return admin.auth().verifyIdToken(match[1]);
 }
 
-async function getUserDoc(uid) {
-  const doc = await db.collection("users").doc(uid).get();
-  return doc.exists ? { id: doc.id, ...doc.data() } : null;
-}
-
 async function requireAdmin(decoded) {
-  const userDoc = await getUserDoc(decoded.uid);
+  const doc = await db.collection("users").doc(decoded.uid).get();
+  const userDoc = doc.exists ? { id: doc.id, ...doc.data() } : null;
   if (!userDoc || userDoc.role !== "admin") throw new Error("Admin only");
   return userDoc;
 }

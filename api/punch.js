@@ -23,8 +23,9 @@ export default async function handler(req, res) {
     const decoded = await verifyToken(req);
     const { type } = req.body;
 
-    if (!["in", "out"].includes(type))
+    if (!["in", "out"].includes(type)) {
       return res.status(400).json({ error: "type must be 'in' or 'out'" });
+    }
 
     const userDoc =
       (await getUserDoc(decoded.uid)) || {
@@ -44,10 +45,11 @@ export default async function handler(req, res) {
 
     if (data?.punches?.length) {
       const last = data.punches[data.punches.length - 1];
-      if (last.type === type)
+      if (last.type === type) {
         return res.status(400).json({
           error: `Already punched ${type}, must punch ${type === "in" ? "out" : "in"} next.`,
         });
+      }
     } else if (type === "out") {
       return res.status(400).json({ error: "Cannot punch out before punching in." });
     }

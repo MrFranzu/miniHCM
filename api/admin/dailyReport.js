@@ -1,5 +1,5 @@
-import { admin, db } from "../../backend/firebaseAdmin.js"; 
-import { setCors } from "../_cors.js";                       
+import { admin, db } from "../../backend/firebaseAdmin.js";
+import { setCors } from "../_cors.js";
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
@@ -8,13 +8,9 @@ async function verifyToken(req) {
   return admin.auth().verifyIdToken(match[1]);
 }
 
-async function getUserDoc(uid) {
-  const doc = await db.collection("users").doc(uid).get();
-  return doc.exists ? { id: doc.id, ...doc.data() } : null;
-}
-
 async function requireAdmin(decoded) {
-  const userDoc = await getUserDoc(decoded.uid);
+  const doc = await db.collection("users").doc(decoded.uid).get();
+  const userDoc = doc.exists ? { id: doc.id, ...doc.data() } : null;
   if (!userDoc || userDoc.role !== "admin") throw new Error("Admin only");
   return userDoc;
 }
@@ -32,7 +28,9 @@ export default async function handler(req, res) {
     if (!date) return res.status(400).json({ error: "date required" });
 
     const snap = await db.collection("dailySummary").where("date", "==", date).get();
-    return res.status(200).json({ date, report: snap.docs.map((d) => d.data()) });
+    const report = snap.docs.map((d) => d.data());
+
+    return res.status(200).json({ date, report });
   } catch (err) {
     console.error("Daily report error:", err);
     return res.status(500).json({ error: err.message });

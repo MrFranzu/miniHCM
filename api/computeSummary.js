@@ -51,11 +51,10 @@ export default async function handler(req, res) {
     snap.forEach((doc) => {
       const data = doc.data();
       (data.punches || []).forEach((p) => {
-        if (!p.timestamp) return;
         let dt;
-        if (p.timestamp.toDate) dt = p.timestamp.toDate();
+        if (p.timestamp?.toDate) dt = p.timestamp.toDate();
         else if (typeof p.timestamp === "string") dt = new Date(p.timestamp);
-        else if (p.timestamp._seconds) dt = new Date(p.timestamp._seconds * 1000);
+        else if (p.timestamp?._seconds) dt = new Date(p.timestamp._seconds * 1000);
         if (dt && !isNaN(dt)) {
           punches.push({
             type: p.type,
