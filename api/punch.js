@@ -18,8 +18,9 @@ async function getUserDoc(uid) {
 
 
 export default function handler(req, res) {
-  res.status(200).json({ ok: true, message: "API works!" });
+  res.status(200).json({ ok: true });
 }
+
 
 
 
