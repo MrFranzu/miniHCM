@@ -35,9 +35,6 @@ export default function PunchButtons({ idToken, user }) {
 };
 
 
-
-  
-
   // Inline styles for professional white/light blue theme
   const containerStyle = {
     display: "flex",
