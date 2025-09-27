@@ -4,8 +4,9 @@ import axios from "axios";
 // Auto-detect backend URL
 const BASE =
   process.env.NODE_ENV === "production"
-    ? "https://mini-hcm.vercel.app/api"
+    ? "/api" // Vercel rewrites to backend
     : "http://localhost:5000/api";
+
 
 // Helper for auth header
 function authHeaders(token) {

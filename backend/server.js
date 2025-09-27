@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import { admin, db } from "../firebaseAdmin.js";
+import { admin, db } from "./firebaseAdmin.js";
 import { DateTime, Interval } from "luxon";
 
 

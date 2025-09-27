@@ -1,5 +1,6 @@
-import { admin, db } from "../../firebaseAdmin.js";
+import { admin, db } from "../firebaseAdmin.js";
 import { DateTime } from "luxon";
+import { setCors } from "./_cors.js";
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
@@ -13,17 +14,23 @@ async function getUserDoc(uid) {
   return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
+async function requireAdmin(decoded) {
+  const userDoc = await getUserDoc(decoded.uid);
+  if (!userDoc || userDoc.role !== "admin") throw new Error("Admin only");
+  return userDoc;
+}
+
 export default async function handler(req, res) {
+  setCors(res);
+  if (req.method === "OPTIONS") return res.status(200).end();
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const decoded = await verifyToken(req);
-    const userDoc = await getUserDoc(decoded.uid);
-    if (!userDoc || userDoc.role !== "admin") {
-      return res.status(403).json({ error: "Admin only" });
-    }
+    await requireAdmin(decoded);
 
     const { userId, weekStart } = req.body;
     if (!weekStart) return res.status(400).json({ error: "weekStart required" });
@@ -31,7 +38,9 @@ export default async function handler(req, res) {
     const start = DateTime.fromISO(weekStart);
     const end = start.plus({ days: 6 }).toISODate();
 
-    let q = db.collection("dailySummary").where("date", ">=", weekStart).where("date", "<=", end);
+    let q = db.collection("dailySummary")
+      .where("date", ">=", weekStart)
+      .where("date", "<=", end);
     if (userId) q = q.where("userId", "==", userId);
 
     const snap = await q.get();
@@ -51,6 +60,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json(report);
   } catch (err) {
+    console.error("Weekly report error:", err);
     return res.status(500).json({ error: err.message });
   }
 }
