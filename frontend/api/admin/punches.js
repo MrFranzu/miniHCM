@@ -1,4 +1,4 @@
-import { admin, db } from "../../backend/firebaseAdmin.js";
+import { admin, db } from "../../../backend/firebaseAdmin.js";
 import { setCors } from "../_cors.js";
 
 async function verifyToken(req) {

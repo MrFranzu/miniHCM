@@ -7,7 +7,7 @@
       "config": { "distDir": "build" }
     },
     {
-      "src": "api/punch.js",
+      "src": "frontend/api/**/*.js",
       "use": "@vercel/node"
     }
   ]
