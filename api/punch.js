@@ -2,6 +2,11 @@ import { admin, db } from "../backend/firebaseAdmin.js";
 import { DateTime } from "luxon";
 import { setCors } from "./_cors.js";
 
+export const config = {
+  runtime: "nodejs18.x"
+};
+
+
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
   const match = authHeader.match(/^Bearer (.+)$/);
