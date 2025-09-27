@@ -2,7 +2,7 @@
 
 import { admin, db } from "../../backend/firebaseAdmin.js";
 import { DateTime, Interval } from "luxon";
-import { setCors } from "./_cors.js";
+import { setCors } from "../_cors.js";
 
 async function verifyToken(req) {
   const authHeader = req.headers.authorization || "";
