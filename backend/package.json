@@ -3,16 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "dev": "vercel dev"   
   },
   "dependencies": {
     "@google-cloud/firestore": "^7.11.5",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
     "firebase-admin": "^11.10.1",
-    "luxon": "^3.5.0",
-    "serverless-http": "^4.0.0"
+    "luxon": "^3.5.0"
   }
 }
