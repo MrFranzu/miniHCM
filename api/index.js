@@ -6,13 +6,14 @@ import dotenv from "dotenv";
 import { admin, db } from "./firebaseAdmin.js"; 
 import { DateTime, Interval } from "luxon";
 import { verifyToken, requireAdmin } from "./middleware/auth.js";
+import serverless from "serverless-http";
+
 
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
 
-// ================= CORS =================
 // ================= CORS =================
 const allowedOrigins = [
   "http://localhost:3000",        // local dev
@@ -364,4 +365,4 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // ================= Export for Vercel =================
-export default app;
+export const handler = serverless(app);
