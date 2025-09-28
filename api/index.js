@@ -52,7 +52,7 @@ function overlapHours(intervalA, intervalB) {
 }
 
 // ================= Attendance =================
-app.post("/api/punch", verifyToken, async (req, res) => {
+app.post("https://mini-hcm-backend.vercel.app/api/punch", verifyToken, async (req, res) => {
   try {
     const { type } = req.body;
     if (!["in", "out"].includes(type)) {
@@ -120,7 +120,7 @@ app.post("/api/punch", verifyToken, async (req, res) => {
 });
 
 // ================= Admin Routes =================
-app.get("/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
+app.get("https://mini-hcm-backend.vercel.app/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userName } = req.query;
     let q = db.collection("attendance").orderBy("lastTimestamp", "asc");
@@ -152,7 +152,7 @@ app.get("/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-app.post("/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => {
+app.post("https://mini-hcm-backend.vercel.app/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { punchId, type, timestampISO } = req.body;
     if (!punchId) return res.status(400).json({ error: "punchId required" });
@@ -193,7 +193,7 @@ app.post("/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => 
 });
 
 // ================= Summary =================
-app.post("/api/computeSummary", verifyToken, async (req, res) => {
+app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, async (req, res) => {
   try {
     const targetUserId = req.body.userId || req.user.uid;
     const dateStr = req.body.date;
@@ -322,7 +322,7 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
 });
 
 // ================= Reports =================
-app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) => {
+app.post("https://mini-hcm-backend.vercel.app/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userId, weekStart } = req.body;
     if (!weekStart) return res.status(400).json({ error: "weekStart required" });
@@ -357,7 +357,7 @@ app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) 
   }
 });
 
-app.post("/api/admin/dailyReport", verifyToken, requireAdmin, async (req, res) => {
+app.post("https://mini-hcm-backend.vercel.app/api/admin/dailyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { date } = req.body;
     if (!date) return res.status(400).json({ error: "date required" });
