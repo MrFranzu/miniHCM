@@ -1,42 +1,61 @@
-// frontend/src/services/api.js
+//frontend\src\services\api.js
+
 import axios from "axios";
+import { auth } from "../firebase";
 
-// Auto-detect backend URL
+
 const BASE =
-  process.env.NODE_ENV === "production"
-    ? "/api"
-    : "https://mini-hcm.vercel.app/api";
+process.env.NODE_ENV === "production"
+? "https://mini-hcm.vercel.app/api"
+: "http://localhost:5000/api";
 
 
-// Helper for auth header
-function authHeaders(token) {
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+const api = axios.create({ baseURL: BASE });
+
+
+// Attach token to every request automatically
+api.interceptors.request.use(async (config) => {
+try {
+const user = auth.currentUser;
+if (user) {
+// do not force refresh on every request in production; only when needed
+const token = await user.getIdToken(true);
+console.log("🔑 Sending ID token:", token.substring(0, 40) + "...");
+config.headers = config.headers || {};
+config.headers.Authorization = `Bearer ${token}`;
+}
+} catch (err) {
+console.warn("Could not attach ID token to request:", err && err.message ? err.message : err);
+}
+return config;
+});
+
+
+export async function punch(type) {
+return api.post(`/punch`, { type });
 }
 
-export async function punch(token, type) {
-  return axios.post(`${BASE}/punch`, { type }, authHeaders(token));
+
+export async function computeSummary(date, userId) {
+return api.post(`/computeSummary`, { date, userId });
 }
 
-export async function computeSummary(token, date, userId) {
-  return axios.post(`${BASE}/computeSummary`, { date, userId }, authHeaders(token));
+
+export async function getAdminPunches(params) {
+return api.get(`/admin/punches`, { params });
 }
 
-export async function getAdminPunches(token, params) {
-  return axios.get(`${BASE}/admin/punches`, { ...authHeaders(token), params });
+
+export async function editPunch(body) {
+return api.post(`/admin/editPunch`, body);
 }
 
-export async function editPunch(token, body) {
-  return axios.post(`${BASE}/admin/editPunch`, body, authHeaders(token));
+
+export async function weeklyReport(body) {
+return api.post(`/admin/weeklyReport`, body);
 }
 
-export async function weeklyReport(token, body) {
-  return axios.post(`${BASE}/admin/weeklyReport`, body, authHeaders(token));
-}
 
-export async function dailyReport(token, { date }) {
-  return axios.post(`${BASE}/admin/dailyReport`, { date }, authHeaders(token));
+export async function dailyReport({ date }) {
+return api.post(`/admin/dailyReport`, { date });
 }

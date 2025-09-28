@@ -3,7 +3,7 @@ import { punch } from "../services/api";
 import { db } from "../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
-export default function PunchButtons({ idToken, user }) {
+export default function PunchButtons({ user }) {
   const [lastPunch, setLastPunch] = useState(null);
 
   useEffect(() => {
@@ -24,25 +24,23 @@ export default function PunchButtons({ idToken, user }) {
   }, [user]);
 
   const doPunch = async (type) => {
-  try {
-    const res = await punch(idToken, type);   // ✅ capture response
-    alert(`Punched ${type}`);
-    console.log("Punch response:", res.data); // optional for debugging
-  } catch (err) {
-    console.error("Punch error:", err);
-    alert("Error punching: " + (err.response?.data?.error || err.message));
-  }
-};
+    try {
+      const res = await punch(type);   // ✅ FIXED
+      alert(`Punched ${type}`);
+      console.log("Punch response:", res.data);
+    } catch (err) {
+      console.error("Punch error:", err);
+      alert("Error punching: " + (err.response?.data?.error || err.message));
+    }
+  };
 
-
-  // Inline styles for professional white/light blue theme
   const containerStyle = {
     display: "flex",
     flexDirection: "column",
     gap: "20px",
     padding: "20px",
-    backgroundColor: "#f5fbff", // very light blue background
-    color: "#004080", // dark blue text
+    backgroundColor: "#f5fbff",
+    color: "#004080",
     minHeight: "250px",
     maxHeight: "400px",
     width: "90vw",
@@ -115,12 +113,6 @@ export default function PunchButtons({ idToken, user }) {
           style={punchInStyle}
           disabled={lastPunch === "in"}
           onClick={() => doPunch("in")}
-          onMouseEnter={(e) => {
-            if (lastPunch !== "in") e.target.style.backgroundColor = "#0056b3";
-          }}
-          onMouseLeave={(e) => {
-            if (lastPunch !== "in") e.target.style.backgroundColor = "#007bff";
-          }}
         >
           Punch In
         </button>
@@ -128,12 +120,6 @@ export default function PunchButtons({ idToken, user }) {
           style={punchOutStyle}
           disabled={lastPunch !== "in"}
           onClick={() => doPunch("out")}
-          onMouseEnter={(e) => {
-            if (lastPunch === "in") e.target.style.backgroundColor = "#003d7a";
-          }}
-          onMouseLeave={(e) => {
-            if (lastPunch === "in") e.target.style.backgroundColor = "#0056b3";
-          }}
         >
           Punch Out
         </button>

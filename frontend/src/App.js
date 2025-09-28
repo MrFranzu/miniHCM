@@ -136,7 +136,7 @@ export default function App() {
                 width: "100%",
               }}
             >
-              <PunchButtons idToken={idToken} user={user} />
+             <PunchButtons user={user} />
             </section>
 
             {/* Dashboard Section */}
@@ -161,7 +161,7 @@ export default function App() {
               >
                 Dashboard
               </h2>
-              <Dashboard idToken={idToken} user={user} />
+              <Dashboard user={user} />
             </section>
 
             {/* History Section */}
@@ -175,7 +175,7 @@ export default function App() {
               }}
             >
               <h2 style={{ margin: "0 0 15px", color: "#003366" }}>History</h2>
-              <History idToken={idToken} user={user} />
+              <History user={user} />
             </section>
 
             {/* Admin Panel Section */}
@@ -192,7 +192,7 @@ export default function App() {
                 <h2 style={{ margin: "0 0 15px", color: "#003366" }}>
                   Admin Panel
                 </h2>
-                <AdminPanel idToken={idToken} user={user} />
+                {role === "admin" && <AdminPanel />}
               </section>
             )}
           </main>

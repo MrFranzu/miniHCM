@@ -26,24 +26,24 @@ export default function AdminPanel({ idToken }) {
   const [dailyDate, setDailyDate] = useState("");
   const [dailyReport, setDailyReport] = useState([]);
 
-  async function fetchPunches() {
+   async function fetchPunches() {
     try {
-      const res = await getAdminPunches(idToken, { userName });
+      const res = await getAdminPunches({ userName });  
       setPunches(res.data.punches || []);
     } catch (err) {
       alert(err.response?.data?.error || err.message);
     }
   }
 
-  async function handleEdit(punchId) {
+   async function handleEdit(punchId) {
     const newType = prompt("New type (in/out)");
-    const newTs = prompt("New ISO timestamp (e.g. 2025-09-23T08:00:00Z) or leave blank");
+    const newTs = prompt("New ISO timestamp or leave blank");
     try {
-      await editPunch(idToken, {
+      await editPunch({
         punchId,
         type: newType,
         timestampISO: newTs || undefined,
-      });
+      });   
       alert("Updated");
       fetchPunches();
     } catch (err) {
@@ -51,9 +51,9 @@ export default function AdminPanel({ idToken }) {
     }
   }
 
-  async function fetchWeekly() {
+ async function fetchWeekly() {
     try {
-      const res = await weeklyReport(idToken, { userName, weekStart });
+      const res = await weeklyReport({ weekStart });   
       setWeeklyReportData(res.data);
     } catch (err) {
       alert(err.response?.data?.error || err.message);
@@ -62,7 +62,7 @@ export default function AdminPanel({ idToken }) {
 
   async function fetchDaily() {
     try {
-      const res = await fetchDailyReportAPI(idToken, { date: dailyDate });
+      const res = await fetchDailyReportAPI({ date: dailyDate });   
       setDailyReport(res.data.report || []);
     } catch (err) {
       alert(err.response?.data?.error || err.message);

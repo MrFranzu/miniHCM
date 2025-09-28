@@ -1,14 +1,13 @@
-// frontend/src/components/Dashboard.js
 import React, { useState } from "react";
 import { computeSummary } from "../services/api";
 
-export default function Dashboard({ idToken, user }) {
+export default function Dashboard({ user }) {
   const [summary, setSummary] = useState(null);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
 
   const handleCompute = async () => {
     try {
-      const res = await computeSummary(idToken, date);
+      const res = await computeSummary(date);   // ✅ FIXED
       setSummary(res.data);
     } catch (err) {
       console.error(err);
@@ -17,30 +16,9 @@ export default function Dashboard({ idToken, user }) {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 25,
-      }}
-    >
-      {/* Controls section */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 20,
-          flexWrap: "wrap",
-        }}
-      >
-        <label
-          htmlFor="date"
-          style={{
-            fontWeight: "600",
-            fontSize: 16,
-            minWidth: 50,
-          }}
-        >
+    <div style={{ display: "flex", flexDirection: "column", gap: 25 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+        <label htmlFor="date" style={{ fontWeight: "600", fontSize: 16, minWidth: 50 }}>
           Date:
         </label>
         <input
@@ -77,7 +55,6 @@ export default function Dashboard({ idToken, user }) {
         </button>
       </div>
 
-      {/* Summary section */}
       {summary && (
         <div
           style={{
@@ -91,26 +68,13 @@ export default function Dashboard({ idToken, user }) {
           }}
         >
           <p style={{ margin: "6px 0", fontWeight: "600", fontSize: 18 }}>
-            Total Worked:{" "}
-            <span style={{ fontWeight: "500" }}>
-              {summary.totalWorkedHours} hrs
-            </span>
+            Total Worked: <span>{summary.totalWorkedHours} hrs</span>
           </p>
-          <p style={{ margin: "4px 0" }}>
-            Regular: <span>{summary.regularHours} hrs</span>
-          </p>
-          <p style={{ margin: "4px 0" }}>
-            Overtime: <span>{summary.overtimeHours} hrs</span>
-          </p>
-          <p style={{ margin: "4px 0" }}>
-            Night Diff: <span>{summary.nightDiffHours} hrs</span>
-          </p>
-          <p style={{ margin: "4px 0" }}>
-            Late: <span>{summary.lateMinutes} mins</span>
-          </p>
-          <p style={{ margin: "4px 0" }}>
-            Undertime: <span>{summary.undertimeMinutes} mins</span>
-          </p>
+          <p>Regular: {summary.regularHours} hrs</p>
+          <p>Overtime: {summary.overtimeHours} hrs</p>
+          <p>Night Diff: {summary.nightDiffHours} hrs</p>
+          <p>Late: {summary.lateMinutes} mins</p>
+          <p>Undertime: {summary.undertimeMinutes} mins</p>
         </div>
       )}
     </div>
