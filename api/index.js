@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 import { admin, db } from "./firebaseAdmin.js"; 
 import { DateTime, Interval } from "luxon";
 import { verifyToken, requireAdmin } from "./middleware/auth.js";
-import serverless from "serverless-http";
 
 
 dotenv.config();
@@ -365,4 +364,6 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // ================= Export for Vercel =================
-export const handler = serverless(app);
+export default (req, res) => {
+  app(req, res); // let Express handle it
+};
