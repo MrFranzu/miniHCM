@@ -3,10 +3,9 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import { admin, db } from "./firebaseAdmin.js"; // centralized firebase init
+import { admin, db } from "../firebaseAdmin.js"; // centralized firebase init
 import { DateTime, Interval } from "luxon";
-import serverless from "serverless-http";
-import { verifyToken, requireAdmin } from "./middleware/auth.js";
+import { verifyToken, requireAdmin } from "../middleware/auth.js";
 
 dotenv.config();
 
@@ -377,5 +376,4 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // ================= Export for Vercel =================
-export const handler = serverless(app);
 export default app;

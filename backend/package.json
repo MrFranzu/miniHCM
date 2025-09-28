@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "start": "node server.js"
+    "start": "node api/server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
