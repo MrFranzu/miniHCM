@@ -1,11 +1,10 @@
 import axios from "axios";
 import { auth } from "../firebase";
 
-// Always use backend API domain in production
-const BASE =
-  process.env.NODE_ENV === "production"
-    ? "https://mini-hcm-backend.vercel.app/api"   // ✅ backend domain
-    : "http://localhost:5000/api";
+const BASE = process.env.NODE_ENV === "production"
+  ? "/api"
+  : "http://localhost:5000/api";
+
 
 const api = axios.create({ baseURL: BASE });
 
