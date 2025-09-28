@@ -28,3 +28,4 @@ yarn-error.log*
 .vercel
 .env*.local
 api/serviceAccountKey.json
+api/serviceAccountKey.json
