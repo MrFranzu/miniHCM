@@ -61,7 +61,7 @@ app.post("/api/punch", verifyToken, async (req, res) => {
   try {
     const { type } = req.body;
     if (!["in", "out"].includes(type)) {
-      return res.status(400).json({ error: "type must be 'in' or 'out'" });
+      return res.status(40).json({ error: "type must be 'in' or 'out'" });
     }
 
     const userDoc =
@@ -84,12 +84,12 @@ app.post("/api/punch", verifyToken, async (req, res) => {
     if (data?.punches?.length) {
       const last = data.punches[data.punches.length - 1];
       if (last.type === type) {
-        return res.status(400).json({
+        return res.status(40).json({
           error: `Already punched ${type}, must punch ${type === "in" ? "out" : "in"} next.`,
         });
       }
     } else if (type === "out") {
-      return res.status(400).json({ error: "Cannot punch out before punching in." });
+      return res.status(40).json({ error: "Cannot punch out before punching in." });
     }
 
     const userName = userDoc.name || userDoc.fullName || req.user.email;
@@ -116,7 +116,7 @@ app.post("/api/punch", verifyToken, async (req, res) => {
     return res.json({ success: true, punch });
   } catch (err) {
     console.error("🔥 Punch error:", err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(50).json({ error: err.message, stack: err.stack });
   }
 });
 
@@ -149,19 +149,19 @@ app.get("/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
     return res.json({ punches });
   } catch (err) {
     console.error("🔥 admin/punches failed:", err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(50).json({ error: err.message, stack: err.stack });
   }
 });
 
 app.post("/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { punchId, type, timestampISO } = req.body;
-    if (!punchId) return res.status(400).json({ error: "punchId required" });
+    if (!punchId) return res.status(40).json({ error: "punchId required" });
 
     const [docId, idxStr] = punchId.split("_");
     const punchIndex = parseInt(idxStr, 10);
     if (!docId || isNaN(punchIndex)) {
-      return res.status(400).json({ error: "Invalid punchId format" });
+      return res.status(40).json({ error: "Invalid punchId format" });
     }
 
     const ref = db.collection("attendance").doc(docId);
@@ -188,7 +188,7 @@ app.post("/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => 
     return res.json({ success: true, punches });
   } catch (err) {
     console.error("🔥 editPunch failed:", err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(50).json({ error: err.message, stack: err.stack });
   }
 });
 
@@ -197,7 +197,7 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
   try {
     const targetUserId = req.body.userId || req.user.uid;
     const dateStr = req.body.date;
-    if (!dateStr) return res.status(400).json({ error: "date required" });
+    if (!dateStr) return res.status(40).json({ error: "date required" });
 
     const userDoc =
       (await getUserDoc(targetUserId)) || {
@@ -304,7 +304,7 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
     return res.json(summary);
   } catch (err) {
     console.error("🔥 computeSummary failed:", err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(50).json({ error: err.message, stack: err.stack });
   }
 });
 
@@ -312,7 +312,7 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
 app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userId, weekStart } = req.body;
-    if (!weekStart) return res.status(400).json({ error: "weekStart required" });
+    if (!weekStart) return res.status(40).json({ error: "weekStart required" });
 
     const start = DateTime.fromISO(weekStart);
     const end = start.plus({ days: 6 }).toISODate();
@@ -340,20 +340,20 @@ app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) 
     return res.json(report);
   } catch (err) {
     console.error("🔥 weeklyReport failed:", err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(50).json({ error: err.message, stack: err.stack });
   }
 });
 
 app.post("/api/admin/dailyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { date } = req.body;
-    if (!date) return res.status(400).json({ error: "date required" });
+    if (!date) return res.status(40).json({ error: "date required" });
 
     const snap = await db.collection("dailySummary").where("date", "==", date).get();
     return res.json({ date, report: snap.docs.map((d) => d.data()) });
   } catch (err) {
     console.error("🔥 dailyReport failed:", err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(50).json({ error: err.message, stack: err.stack });
   }
 });
 
