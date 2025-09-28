@@ -3,9 +3,9 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import { admin, db } from "../backend/firebaseAdmin.js"; // centralized firebase init
+import { admin, db } from "../firebaseAdmin.js"; // centralized firebase init
 import { DateTime, Interval } from "luxon";
-import { verifyToken, requireAdmin } from "../backend/middleware/auth.js";
+import { verifyToken, requireAdmin } from "../middleware/auth.js";
 
 dotenv.config();
 
@@ -14,8 +14,8 @@ app.use(bodyParser.json());
 
 // ================= CORS =================
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://mini-hcm.vercel.app",
+  "http://localhost:3000",          // for local dev
+  "https://mini-hcm.vercel.app",    
 ];
 
 const corsOptions = {
@@ -23,6 +23,7 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn("❌ Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -32,7 +33,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // handle preflight
+app.options("*", cors(corsOptions)); // Handle preflight requests
 
 // ================= Helpers =================
 async function getUserDoc(uid) {
