@@ -13,27 +13,32 @@ const app = express();
 app.use(bodyParser.json());
 
 // ================= CORS =================
+// ================= CORS =================
 const allowedOrigins = [
-  "http://localhost:3000",          // local dev
-  "https://mini-hcm.vercel.app",    // frontend production
+  "http://localhost:3000",        // local dev
+  "https://mini-hcm.vercel.app",  // frontend production
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow server-to-server or curl requests with no origin
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
+// explicitly handle OPTIONS
+app.options("*", cors());
+
 
 // ================= Helpers =================
 async function getUserDoc(uid) {
