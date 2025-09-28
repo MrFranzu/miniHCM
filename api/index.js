@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import { admin, db } from "./firebaseAdmin.js"; // centralized firebase init
+import { admin, db } from "./firebaseAdmin.js"; 
 import { DateTime, Interval } from "luxon";
 import { verifyToken, requireAdmin } from "./middleware/auth.js";
 
@@ -14,8 +14,8 @@ app.use(bodyParser.json());
 
 // ================= CORS =================
 const allowedOrigins = [
-  "http://localhost:3000",          // for local dev
-  "https://mini-hcm.vercel.app",    
+  "http://localhost:3000",          // local dev
+  "https://mini-hcm.vercel.app",    // frontend production
 ];
 
 const corsOptions = {
@@ -52,7 +52,7 @@ function overlapHours(intervalA, intervalB) {
 }
 
 // ================= Attendance =================
-app.post("https://mini-hcm-backend.vercel.app/api/punch", verifyToken, async (req, res) => {
+app.post("/api/punch", verifyToken, async (req, res) => {
   try {
     const { type } = req.body;
     if (!["in", "out"].includes(type)) {
@@ -80,15 +80,11 @@ app.post("https://mini-hcm-backend.vercel.app/api/punch", verifyToken, async (re
       const last = data.punches[data.punches.length - 1];
       if (last.type === type) {
         return res.status(400).json({
-          error: `Already punched ${type}, must punch ${
-            type === "in" ? "out" : "in"
-          } next.`,
+          error: `Already punched ${type}, must punch ${type === "in" ? "out" : "in"} next.`,
         });
       }
     } else if (type === "out") {
-      return res
-        .status(400)
-        .json({ error: "Cannot punch out before punching in." });
+      return res.status(400).json({ error: "Cannot punch out before punching in." });
     }
 
     const userName = userDoc.name || userDoc.fullName || req.user.email;
@@ -120,7 +116,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/punch", verifyToken, async (re
 });
 
 // ================= Admin Routes =================
-app.get("https://mini-hcm-backend.vercel.app/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
+app.get("/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userName } = req.query;
     let q = db.collection("attendance").orderBy("lastTimestamp", "asc");
@@ -128,8 +124,8 @@ app.get("https://mini-hcm-backend.vercel.app/api/admin/punches", verifyToken, re
     if (userName) q = q.where("userName", "==", userName);
 
     const snap = await q.get();
-
     const punches = [];
+
     snap.forEach((doc) => {
       const data = doc.data();
       const name = data.userName || data.userId || "Unknown";
@@ -152,7 +148,7 @@ app.get("https://mini-hcm-backend.vercel.app/api/admin/punches", verifyToken, re
   }
 });
 
-app.post("https://mini-hcm-backend.vercel.app/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => {
+app.post("/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { punchId, type, timestampISO } = req.body;
     if (!punchId) return res.status(400).json({ error: "punchId required" });
@@ -165,8 +161,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/admin/editPunch", verifyToken,
 
     const ref = db.collection("attendance").doc(docId);
     const snap = await ref.get();
-    if (!snap.exists)
-      return res.status(404).json({ error: "Punch record not found" });
+    if (!snap.exists) return res.status(404).json({ error: "Punch record not found" });
 
     let data = snap.data();
     let punches = data.punches || [];
@@ -193,7 +188,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/admin/editPunch", verifyToken,
 });
 
 // ================= Summary =================
-app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, async (req, res) => {
+app.post("/api/computeSummary", verifyToken, async (req, res) => {
   try {
     const targetUserId = req.body.userId || req.user.uid;
     const dateStr = req.body.date;
@@ -225,8 +220,8 @@ app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, 
           let dt;
           if (p.timestamp.toDate) dt = p.timestamp.toDate();
           else if (typeof p.timestamp === "string") dt = new Date(p.timestamp);
-          else if (p.timestamp._seconds)
-            dt = new Date(p.timestamp._seconds * 1000);
+          else if (p.timestamp._seconds) dt = new Date(p.timestamp._seconds * 1000);
+
           if (dt && !isNaN(dt)) {
             punches.push({
               type: p.type,
@@ -255,25 +250,16 @@ app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, 
     }
 
     const sched = userDoc.schedule || { start: "09:00", end: "18:00" };
-    const schedStart = DateTime.fromISO(`${dateStr}T${sched.start}`, {
-      zone: tz,
-    });
+    const schedStart = DateTime.fromISO(`${dateStr}T${sched.start}`, { zone: tz });
     let schedEnd = DateTime.fromISO(`${dateStr}T${sched.end}`, { zone: tz });
     if (schedEnd <= schedStart) schedEnd = schedEnd.plus({ days: 1 });
     const schedInterval = Interval.fromDateTimes(schedStart, schedEnd);
 
     const ndStart = DateTime.fromISO(`${dateStr}T22:00:00`, { zone: tz });
-    const ndEnd = DateTime.fromISO(`${dateStr}T06:00:00`, { zone: tz }).plus({
-      days: 1,
-    });
+    const ndEnd = DateTime.fromISO(`${dateStr}T06:00:00`, { zone: tz }).plus({ days: 1 });
     const ndInterval = Interval.fromDateTimes(ndStart, ndEnd);
 
-    let total = 0,
-      regular = 0,
-      overtime = 0,
-      nd = 0,
-      late = 0,
-      undertime = 0;
+    let total = 0, regular = 0, overtime = 0, nd = 0, late = 0, undertime = 0;
 
     for (const { in: inDt, out: outDt } of pairs) {
       const workInt = Interval.fromDateTimes(inDt, outDt);
@@ -290,8 +276,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, 
         late = pairs[0].in.diff(schedStart, "minutes").minutes;
       }
       if (pairs[pairs.length - 1].out < schedEnd) {
-        undertime = schedEnd.diff(pairs[pairs.length - 1].out, "minutes")
-          .minutes;
+        undertime = schedEnd.diff(pairs[pairs.length - 1].out, "minutes").minutes;
       }
     }
 
@@ -309,10 +294,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, 
       generatedAt: admin.firestore.Timestamp.now(),
     };
 
-    await db
-      .collection("dailySummary")
-      .doc(`${targetUserId}_${dateStr}`)
-      .set(summary);
+    await db.collection("dailySummary").doc(`${targetUserId}_${dateStr}`).set(summary);
 
     return res.json(summary);
   } catch (err) {
@@ -322,7 +304,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/computeSummary", verifyToken, 
 });
 
 // ================= Reports =================
-app.post("https://mini-hcm-backend.vercel.app/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) => {
+app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userId, weekStart } = req.body;
     if (!weekStart) return res.status(400).json({ error: "weekStart required" });
@@ -357,7 +339,7 @@ app.post("https://mini-hcm-backend.vercel.app/api/admin/weeklyReport", verifyTok
   }
 });
 
-app.post("https://mini-hcm-backend.vercel.app/api/admin/dailyReport", verifyToken, requireAdmin, async (req, res) => {
+app.post("/api/admin/dailyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { date } = req.body;
     if (!date) return res.status(400).json({ error: "date required" });
