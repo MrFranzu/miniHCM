@@ -1,34 +1,31 @@
-// backend/index.js
+// api/index.js
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import { admin, db } from "./firebaseAdmin.js"; 
+import { admin, db } from "./firebaseAdmin.js";
 import { DateTime, Interval } from "luxon";
 import { verifyToken, requireAdmin } from "./middleware/auth.js";
-
 
 dotenv.config();
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 
 // ================= CORS =================
 const allowedOrigins = [
-  "http://localhost:3000",        // local dev
-  "https://mini-hcm.vercel.app",  // frontend production
+  "http://localhost:3000", // local dev
+  "https://mini-hcm.vercel.app", // frontend production
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin(origin, callback) {
       // Allow server-to-server or curl requests with no origin
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn("❌ Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+      console.warn("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -38,7 +35,6 @@ app.use(
 
 // explicitly handle OPTIONS
 app.options("*", cors());
-
 
 // ================= Helpers =================
 async function getUserDoc(uid) {
@@ -53,7 +49,21 @@ async function getUserDoc(uid) {
 
 function overlapHours(intervalA, intervalB) {
   const inter = intervalA.intersection(intervalB);
-  return inter ? inter.toDuration(["hours"]).hours : 0;
+  if (!inter) return 0;
+  return inter.toDuration(["hours"]).hours;
+}
+
+function toFirestoreTimestampFromAny(ts) {
+  // Accepts admin.Timestamp, JS Date, ISO string, or object with _seconds
+  if (!ts) return null;
+  if (ts.toDate && typeof ts.toDate === "function") return ts; // already admin.Timestamp
+  if (typeof ts === "string" || ts instanceof String) {
+    const d = new Date(ts);
+    if (!isNaN(d)) return admin.firestore.Timestamp.fromDate(d);
+  }
+  if (ts instanceof Date) return admin.firestore.Timestamp.fromDate(ts);
+  if (ts._seconds) return admin.firestore.Timestamp.fromMillis(ts._seconds * 1000 + (ts._nanoseconds || 0) / 1e6);
+  return null;
 }
 
 // ================= Attendance =================
@@ -61,7 +71,7 @@ app.post("/api/punch", verifyToken, async (req, res) => {
   try {
     const { type } = req.body;
     if (!["in", "out"].includes(type)) {
-      return res.status(40).json({ error: "type must be 'in' or 'out'" });
+      return res.status(400).json({ error: "type must be 'in' or 'out'" });
     }
 
     const userDoc =
@@ -73,30 +83,31 @@ app.post("/api/punch", verifyToken, async (req, res) => {
       };
 
     const tz = userDoc.timezone || "UTC";
-    const now = DateTime.now().setZone(tz);
-    const dateStr = now.toISODate();
+    const nowLocal = DateTime.now().setZone(tz);
+    const dateStr = nowLocal.toISODate();
 
     const ref = db.collection("attendance").doc(`${req.user.uid}_${dateStr}`);
     const docSnap = await ref.get();
-    const data = docSnap.data();
+    const data = docSnap.exists ? docSnap.data() : null;
 
     // Prevent double punching
-    if (data?.punches?.length) {
-      const last = data.punches[data.punches.length - 1];
+    const punchesArr = data?.punches || [];
+    if (punchesArr.length > 0) {
+      const last = punchesArr[punchesArr.length - 1];
       if (last.type === type) {
-        return res.status(40).json({
+        return res.status(400).json({
           error: `Already punched ${type}, must punch ${type === "in" ? "out" : "in"} next.`,
         });
       }
     } else if (type === "out") {
-      return res.status(40).json({ error: "Cannot punch out before punching in." });
+      return res.status(400).json({ error: "Cannot punch out before punching in." });
     }
 
     const userName = userDoc.name || userDoc.fullName || req.user.email;
 
     const punch = {
       type,
-      timestamp: admin.firestore.Timestamp.fromDate(now.toUTC().toJSDate()),
+      timestamp: admin.firestore.Timestamp.fromDate(nowLocal.toUTC().toJSDate()),
       source: "web",
       userId: req.user.uid,
       userName,
@@ -116,27 +127,35 @@ app.post("/api/punch", verifyToken, async (req, res) => {
     return res.json({ success: true, punch });
   } catch (err) {
     console.error("🔥 Punch error:", err);
-    return res.status(50).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
 // ================= Admin Routes =================
+// ================== GET Punches ==================
 app.get("/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userName } = req.query;
-    let q = db.collection("attendance").orderBy("lastTimestamp", "asc");
+    let q = db.collection("attendance");
 
-    if (userName) q = q.where("userName", "==", userName);
+    if (userName) {
+      q = q.where("userName", "==", userName);
+    } else {
+      q = q.orderBy("lastTimestamp", "asc");
+    }
 
     const snap = await q.get();
     const punches = [];
 
     snap.forEach((doc) => {
-      const data = doc.data();
+      const data = doc.data() || {};
       const name = data.userName || data.userId || "Unknown";
+
       (data.punches || []).forEach((p, idx) => {
         punches.push({
-          id: `${doc.id}_${idx}`,
+          id: `${doc.id}_${idx}`,   // combined id for convenience
+          docId: doc.id,            // explicit docId
+          index: idx,               // explicit punch index
           userId: data.userId,
           userName: name,
           type: p.type,
@@ -146,58 +165,91 @@ app.get("/api/admin/punches", verifyToken, requireAdmin, async (req, res) => {
       });
     });
 
+    // Sort manually if filtering by userName
+    if (userName) {
+      punches.sort((a, b) => {
+        const aTime = a.timestamp?._seconds || a.timestamp?.seconds || 0;
+        const bTime = b.timestamp?._seconds || b.timestamp?.seconds || 0;
+        return aTime - bTime;
+      });
+    }
+
     return res.json({ punches });
   } catch (err) {
     console.error("🔥 admin/punches failed:", err);
-    return res.status(50).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
+// ================== EDIT Punch ==================
 app.post("/api/admin/editPunch", verifyToken, requireAdmin, async (req, res) => {
   try {
-    const { punchId, type, timestampISO } = req.body;
-    if (!punchId) return res.status(40).json({ error: "punchId required" });
+    let { id, docId, index, type, timestampISO } = req.body;
 
-    const [docId, idxStr] = punchId.split("_");
-    const punchIndex = parseInt(idxStr, 10);
-    if (!docId || isNaN(punchIndex)) {
-      return res.status(40).json({ error: "Invalid punchId format" });
+    // Support both formats: "docId_index" OR explicit docId + index
+    if (id && !docId && (index === undefined || index === null)) {
+      const parts = id.split("_");
+      index = parseInt(parts.pop(), 10);
+      docId = parts.join("_");
+    }
+
+    if (!docId) return res.status(400).json({ error: "docId required" });
+    if (index === undefined || index === null) return res.status(400).json({ error: "index required" });
+
+    const punchIndex = parseInt(index, 10);
+    if (isNaN(punchIndex)) {
+      return res.status(400).json({ error: "Invalid index format" });
     }
 
     const ref = db.collection("attendance").doc(docId);
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ error: "Punch record not found" });
 
-    let data = snap.data();
-    let punches = data.punches || [];
+    const data = snap.data() || {};
+    const punches = Array.isArray(data.punches) ? [...data.punches] : [];
 
     if (!punches[punchIndex]) {
       return res.status(404).json({ error: "Punch index not found" });
     }
 
-    punches[punchIndex] = {
+    // Update only provided fields
+    const updatedPunch = {
       ...punches[punchIndex],
       type: type || punches[punchIndex].type,
-      timestamp: timestampISO || punches[punchIndex].timestamp,
       editedBy: req.user.uid,
-      editedAt: new Date().toISOString(),
+      editedAt: admin.firestore.Timestamp.now(),
     };
+
+    if (timestampISO) {
+      const ts = toFirestoreTimestampFromAny(timestampISO);
+      if (!ts) return res.status(400).json({ error: "Invalid timestampISO" });
+      updatedPunch.timestamp = ts;
+    }
+
+    punches[punchIndex] = updatedPunch;
 
     await ref.update({ punches });
 
-    return res.json({ success: true, punches });
+    return res.json({
+      success: true,
+      message: "Punch updated successfully",
+      docId,
+      index: punchIndex,
+      punch: updatedPunch,
+    });
   } catch (err) {
     console.error("🔥 editPunch failed:", err);
-    return res.status(50).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
+
 
 // ================= Summary =================
 app.post("/api/computeSummary", verifyToken, async (req, res) => {
   try {
     const targetUserId = req.body.userId || req.user.uid;
     const dateStr = req.body.date;
-    if (!dateStr) return res.status(40).json({ error: "date required" });
+    if (!dateStr) return res.status(400).json({ error: "date required" });
 
     const userDoc =
       (await getUserDoc(targetUserId)) || {
@@ -222,22 +274,25 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
       if (Array.isArray(data.punches)) {
         data.punches.forEach((p) => {
           if (!p.timestamp) return;
-          let dt;
-          if (p.timestamp.toDate) dt = p.timestamp.toDate();
+          let dt = null;
+          // handle admin.Timestamp, string, object with _seconds, or ISO
+          if (p.timestamp.toDate && typeof p.timestamp.toDate === "function") dt = p.timestamp.toDate();
           else if (typeof p.timestamp === "string") dt = new Date(p.timestamp);
           else if (p.timestamp._seconds) dt = new Date(p.timestamp._seconds * 1000);
+          else if (p.timestamp instanceof Date) dt = p.timestamp;
 
-          if (dt && !isNaN(dt)) {
+          if (dt && !isNaN(dt.getTime())) {
             punches.push({
               type: p.type,
-              localDateTime: DateTime.fromJSDate(dt).setZone(tz),
+              localDateTime: DateTime.fromJSDate(dt, { zone: tz }),
             });
           }
         });
       }
     });
 
-    punches.sort((a, b) => a.localDateTime - b.localDateTime);
+    // sort by millis
+    punches.sort((a, b) => a.localDateTime.toMillis() - b.localDateTime.toMillis());
 
     const pairs = [];
     let currentIn = null;
@@ -260,11 +315,17 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
     if (schedEnd <= schedStart) schedEnd = schedEnd.plus({ days: 1 });
     const schedInterval = Interval.fromDateTimes(schedStart, schedEnd);
 
+    // Night Differential: 22:00 - 06:00 (spans midnight)
     const ndStart = DateTime.fromISO(`${dateStr}T22:00:00`, { zone: tz });
     const ndEnd = DateTime.fromISO(`${dateStr}T06:00:00`, { zone: tz }).plus({ days: 1 });
     const ndInterval = Interval.fromDateTimes(ndStart, ndEnd);
 
-    let total = 0, regular = 0, overtime = 0, nd = 0, late = 0, undertime = 0;
+    let total = 0;
+    let regular = 0;
+    let overtime = 0;
+    let nd = 0;
+    let late = 0;
+    let undertime = 0;
 
     for (const { in: inDt, out: outDt } of pairs) {
       const workInt = Interval.fromDateTimes(inDt, outDt);
@@ -304,7 +365,7 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
     return res.json(summary);
   } catch (err) {
     console.error("🔥 computeSummary failed:", err);
-    return res.status(50).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
@@ -312,12 +373,13 @@ app.post("/api/computeSummary", verifyToken, async (req, res) => {
 app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { userId, weekStart } = req.body;
-    if (!weekStart) return res.status(40).json({ error: "weekStart required" });
+    if (!weekStart) return res.status(400).json({ error: "weekStart required" });
 
     const start = DateTime.fromISO(weekStart);
     const end = start.plus({ days: 6 }).toISODate();
 
-    let q = db.collection("dailySummary")
+    let q = db
+      .collection("dailySummary")
       .where("date", ">=", weekStart)
       .where("date", "<=", end);
     if (userId) q = q.where("userId", "==", userId);
@@ -325,7 +387,13 @@ app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) 
     const snap = await q.get();
     const days = snap.docs.map((d) => d.data());
 
-    const totals = { regularHours: 0, overtimeHours: 0, nightDiffHours: 0, lateMinutes: 0, undertimeMinutes: 0 };
+    const totals = {
+      regularHours: 0,
+      overtimeHours: 0,
+      nightDiffHours: 0,
+      lateMinutes: 0,
+      undertimeMinutes: 0,
+    };
     for (const d of days) {
       totals.regularHours += d.regularHours || 0;
       totals.overtimeHours += d.overtimeHours || 0;
@@ -340,20 +408,20 @@ app.post("/api/admin/weeklyReport", verifyToken, requireAdmin, async (req, res) 
     return res.json(report);
   } catch (err) {
     console.error("🔥 weeklyReport failed:", err);
-    return res.status(50).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
 app.post("/api/admin/dailyReport", verifyToken, requireAdmin, async (req, res) => {
   try {
     const { date } = req.body;
-    if (!date) return res.status(40).json({ error: "date required" });
+    if (!date) return res.status(400).json({ error: "date required" });
 
     const snap = await db.collection("dailySummary").where("date", "==", date).get();
     return res.json({ date, report: snap.docs.map((d) => d.data()) });
   } catch (err) {
     console.error("🔥 dailyReport failed:", err);
-    return res.status(50).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
@@ -365,5 +433,5 @@ if (process.env.NODE_ENV !== "production") {
 
 // ================= Export for Vercel =================
 export default (req, res) => {
-  app(req, res); // let Express handle it
+  app(req, res);
 };
